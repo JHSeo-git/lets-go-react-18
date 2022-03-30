@@ -1,5 +1,6 @@
 import { NavLink, Route, Routes } from 'react-router-dom';
 import AutomaticBatching from './components/AutomaticBatching/AutomaticBatching';
+import Home from './components/Home';
 import Transitions from './components/Transitions';
 import './styles.css';
 
@@ -20,7 +21,7 @@ function App() {
       </header>
       <main>
         <Routes>
-          <Route path="/" element={<div>Home</div>} />
+          <Route path="/" element={<Home />} />
           <Route path="/automatic-batching" element={<AutomaticBatching />} />
           <Route path="/transitions" element={<Transitions />} />
         </Routes>
