@@ -8,7 +8,8 @@ const config = {
   mode: 'development',
   devtool: 'inline-source-map',
   devServer: {
-    static: ['./dist', './public'],
+    historyApiFallback: true,
+    static: ['./dist'],
     hot: true,
   },
 };
