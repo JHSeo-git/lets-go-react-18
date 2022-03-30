@@ -9,7 +9,7 @@ const config = {
   entry: packageJson.source,
   output: {
     path: path.resolve(__dirname, 'dist'),
-    filename: '[name].[chinkhash].bundle.js',
+    filename: '[name].[chunkhash].bundle.js',
     clean: true,
   },
   optimization: {
