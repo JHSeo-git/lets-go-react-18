@@ -16,8 +16,9 @@
     "isolatedModules": true,
     "noEmit": true,
     "composite": true,
-    "jsx": "react-jsx"
+    "jsx": "react-jsx",
+    "types": ["react/next", "react-dom/next"]
   },
-  "include": ["src"],
+  "include": ["src", "global.d.ts"],
   "exclude": ["node_modules", "dist"]
 }
