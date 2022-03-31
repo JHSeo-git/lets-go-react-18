@@ -1,5 +1,7 @@
 import { ChangeEventHandler, useState, useTransition } from 'react';
+import ColorItem from './ColorItem';
 import ListItem from './ListItem';
+import { getColors } from './Transitions.helpers';
 
 export type TransitionWithProps = {
   names: string[];
@@ -12,18 +14,36 @@ function TransitionWith({ names }: TransitionWithProps) {
 
   const handleChange: ChangeEventHandler<HTMLInputElement> = (e) => {
     setQuery(e.target.value);
-    startTransition(() => setHighlight(e.target.value));
+    startTransition(() => {
+      setHighlight(e.target.value);
+    });
   };
 
   return (
     <>
       <h2>With Transitions</h2>
       <div>
-        <input type="text" value={query} onChange={handleChange} />
-        {isPending && <span>Pending...</span>}
-        {names.map((name, i) => (
+        <div className="input-box">
+          <input
+            type="text"
+            value={query}
+            onChange={handleChange}
+            maxLength={100}
+          />
+          <span style={{ color: isPending ? 'gray' : 'black' }}>
+            {highlight.length}
+          </span>
+        </div>
+        <div style={{ display: 'flex', flexWrap: 'wrap', marginTop: '1rem' }}>
+          {getColors(highlight.length * highlight.length * 2).map(
+            (color, i) => (
+              <ColorItem key={i} color={color} />
+            )
+          )}
+        </div>
+        {/* {names.map((name, i) => (
           <ListItem key={i} name={name} highlight={highlight} />
-        ))}
+        ))} */}
       </div>
     </>
   );
