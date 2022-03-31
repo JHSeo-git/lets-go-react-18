@@ -1,13 +1,11 @@
 import { ChangeEventHandler, useState, useTransition } from 'react';
-import ColorItem from './ColorItem';
 import ListItem from './ListItem';
-import { getColors } from './Transitions.helpers';
 
-export type TransitionWithProps = {
+export type TransitionWithEx2Props = {
   names: string[];
 };
 
-function TransitionWith({ names }: TransitionWithProps) {
+function TransitionWithEx2({ names }: TransitionWithEx2Props) {
   const [query, setQuery] = useState('');
   const [highlight, setHighlight] = useState('');
   const [isPending, startTransition] = useTransition();
@@ -21,7 +19,7 @@ function TransitionWith({ names }: TransitionWithProps) {
 
   return (
     <>
-      <h2>With Transitions</h2>
+      <h2>With Transitions: query and highlight</h2>
       <div>
         <div className="input-box">
           <input
@@ -35,24 +33,17 @@ function TransitionWith({ names }: TransitionWithProps) {
         <div
           style={{
             position: 'relative',
-            display: 'flex',
-            flexWrap: 'wrap',
             marginTop: '1rem',
           }}
         >
-          {getColors(highlight.length * highlight.length * 2).map(
-            (color, i) => (
-              <ColorItem key={i} color={color} />
-            )
-          )}
+          {names.map((name, i) => (
+            <ListItem key={i} name={name} highlight={highlight} />
+          ))}
           {isPending && <div className="overlay">Pending</div>}
         </div>
-        {/* {names.map((name, i) => (
-          <ListItem key={i} name={name} highlight={highlight} />
-        ))} */}
       </div>
     </>
   );
 }
 
-export default TransitionWith;
+export default TransitionWithEx2;

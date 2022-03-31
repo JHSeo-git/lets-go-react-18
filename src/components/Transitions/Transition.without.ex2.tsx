@@ -1,13 +1,11 @@
 import { ChangeEventHandler, useState } from 'react';
-import ColorItem from './ColorItem';
 import ListItem from './ListItem';
-import { getColors } from './Transitions.helpers';
 
-export type TransitionWithoutProps = {
+export type TransitionWithoutEx2Props = {
   names: string[];
 };
 
-function TransitionWithout({ names }: TransitionWithoutProps) {
+function TransitionWithoutEx2({ names }: TransitionWithoutEx2Props) {
   const [query, setQuery] = useState('');
   const handleChange: ChangeEventHandler<HTMLInputElement> = (e) => {
     setQuery(e.target.value);
@@ -15,7 +13,7 @@ function TransitionWithout({ names }: TransitionWithoutProps) {
 
   return (
     <>
-      <h2>Without Transitions</h2>
+      <h2>Without Transitions: query and highlight</h2>
       <div>
         <div className="input-box">
           <input
@@ -26,17 +24,14 @@ function TransitionWithout({ names }: TransitionWithoutProps) {
           />
           <span>{query.length}</span>
         </div>
-        <div style={{ display: 'flex', flexWrap: 'wrap', marginTop: '1rem' }}>
-          {getColors(query.length * query.length * 2).map((color, i) => (
-            <ColorItem key={i} color={color} />
+        <div style={{ marginTop: '1rem' }}>
+          {names.map((name, i) => (
+            <ListItem key={i} name={name} highlight={query} />
           ))}
         </div>
-        {/* {names.map((name, i) => (
-          <ListItem key={i} name={name} highlight={query} />
-        ))} */}
       </div>
     </>
   );
 }
 
-export default TransitionWithout;
+export default TransitionWithoutEx2;

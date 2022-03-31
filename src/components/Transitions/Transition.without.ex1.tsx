@@ -1,22 +1,16 @@
-import { ChangeEventHandler, useDeferredValue, useState } from 'react';
+import { ChangeEventHandler, useState } from 'react';
 import ColorItem from './ColorItem';
-import ListItem from './ListItem';
 import { getColors } from './Transitions.helpers';
 
-export type TransitionDeferProps = {
-  names: string[];
-};
-
-function TransitionDefer({ names }: TransitionDeferProps) {
+function TransitionWithoutEx1() {
   const [query, setQuery] = useState('');
-  const deferredHighlight = useDeferredValue(query);
   const handleChange: ChangeEventHandler<HTMLInputElement> = (e) => {
     setQuery(e.target.value);
   };
 
   return (
     <>
-      <h2>useDeferredValue</h2>
+      <h2>Without Transitions: random color box</h2>
       <div>
         <div className="input-box">
           <input
@@ -28,18 +22,13 @@ function TransitionDefer({ names }: TransitionDeferProps) {
           <span>{query.length}</span>
         </div>
         <div style={{ display: 'flex', flexWrap: 'wrap', marginTop: '1rem' }}>
-          {getColors(
-            deferredHighlight.length * deferredHighlight.length * 2
-          ).map((color, i) => (
+          {getColors(query.length * query.length * 2).map((color, i) => (
             <ColorItem key={i} color={color} />
           ))}
         </div>
-        {/* {names.map((name, i) => (
-          <ListItem key={i} name={name} highlight={deferredHighlight} />
-        ))} */}
       </div>
     </>
   );
 }
 
-export default TransitionDefer;
+export default TransitionWithoutEx1;
