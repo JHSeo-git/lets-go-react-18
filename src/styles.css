@@ -101,6 +101,20 @@ input[type='text'] {
   padding: 0;
 }
 
+.overlay {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.1);
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  font-size: '2rem';
+  font-weight: bold;
+  color: black;
+}
+
 @keyframes flash {
   0% {
     opacity: 0;

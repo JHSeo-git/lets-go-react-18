@@ -16,7 +16,7 @@ function TransitionDefer({ names }: TransitionDeferProps) {
 
   return (
     <>
-      <h2>Without Transitions</h2>
+      <h2>useDeferredValue</h2>
       <div>
         <div className="input-box">
           <input

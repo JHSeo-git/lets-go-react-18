@@ -14,10 +14,10 @@ function Transitions() {
   const [tab, setTab] = useState<Tab>('with');
   return (
     <article>
-      <div>
+      <div style={{ marginBottom: '2rem' }}>
         <button onClick={() => setTab('with')}>With Transitions</button>
         <button onClick={() => setTab('without')}>Without Transitions</button>
-        <button onClick={() => setTab('defer')}>useDeferred Transitions</button>
+        <button onClick={() => setTab('defer')}>useDeferredValue</button>
       </div>
       {tab === 'with' && <TransitionWith names={names} />}
       {tab === 'without' && <TransitionWithout names={names} />}

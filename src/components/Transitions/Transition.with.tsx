@@ -30,16 +30,22 @@ function TransitionWith({ names }: TransitionWithProps) {
             onChange={handleChange}
             maxLength={100}
           />
-          <span style={{ color: isPending ? 'gray' : 'black' }}>
-            {highlight.length}
-          </span>
+          <span>{highlight.length}</span>
         </div>
-        <div style={{ display: 'flex', flexWrap: 'wrap', marginTop: '1rem' }}>
+        <div
+          style={{
+            position: 'relative',
+            display: 'flex',
+            flexWrap: 'wrap',
+            marginTop: '1rem',
+          }}
+        >
           {getColors(highlight.length * highlight.length * 2).map(
             (color, i) => (
               <ColorItem key={i} color={color} />
             )
           )}
+          {isPending && <div className="overlay">Pending</div>}
         </div>
         {/* {names.map((name, i) => (
           <ListItem key={i} name={name} highlight={highlight} />
