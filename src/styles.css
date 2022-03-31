@@ -49,6 +49,11 @@ a {
   color: inherit;
 }
 
+a:hover {
+  text-decoration: underline;
+  color: #00f;
+}
+
 a.active {
   color: #f00;
 }
@@ -126,4 +131,24 @@ input[type='text'] {
 
 .flash {
   animation: flash 0.5s ease-in-out infinite alternate;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.spin {
+  color: black;
+  animation: spin 1s linear infinite;
+}
+.spin circle {
+  opacity: 0.25;
+}
+.spin path {
+  opacity: 0.75;
 }
