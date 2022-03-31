@@ -57,6 +57,14 @@ article {
   margin-top: 2rem;
 }
 
+input[type='text'] {
+  border: 1px solid #ccc;
+  border-radius: 0.25rem;
+  padding: 0.5rem;
+  font-size: inherit;
+  color: inherit;
+}
+
 .subtle {
   display: flex;
   justify-content: center;
@@ -71,6 +79,26 @@ article {
 
 .highlight {
   color: red;
+}
+
+.input-box {
+  display: flex;
+  align-items: center;
+}
+.input-box input {
+  flex: 1;
+}
+.input-box span {
+  padding-left: 1rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.color-box {
+  background-color: brown;
+  width: 4px;
+  height: 4px;
+  margin: 1px;
+  padding: 0;
 }
 
 @keyframes flash {
