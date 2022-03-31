@@ -16,6 +16,9 @@ function AutomaticBatching() {
   return (
     <article>
       <h2>Automatic Batching</h2>
+      <h3>
+        See <code>console</code> tab.
+      </h3>
       <div
         style={{
           marginTop: '1rem',
