@@ -17,8 +17,8 @@
     "noEmit": true,
     "composite": true,
     "jsx": "react-jsx",
-    "types": ["react/next", "react-dom/next"]
+    "types": ["node", "react/next", "react-dom/next"]
   },
-  "include": ["src", "global.d.ts"],
+  "include": ["src"],
   "exclude": ["node_modules", "dist"]
 }
