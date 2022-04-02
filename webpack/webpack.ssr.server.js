@@ -38,7 +38,17 @@ const config = {
     rules: [
       {
         test: /\.tsx?$/,
-        use: ['babel-loader', 'ts-loader'],
+        use: [
+          'babel-loader',
+          {
+            loader: 'ts-loader',
+            options: {
+              compilerOptions: {
+                noEmit: false,
+              },
+            },
+          },
+        ],
         exclude: /node_modules/,
       },
     ],

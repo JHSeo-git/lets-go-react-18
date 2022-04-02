@@ -59,7 +59,17 @@ const getConfig = (target) => ({
     rules: [
       {
         test: /\.tsx?$/,
-        use: ['babel-loader', 'ts-loader'],
+        use: [
+          'babel-loader',
+          {
+            loader: 'ts-loader',
+            options: {
+              compilerOptions: {
+                noEmit: false,
+              },
+            },
+          },
+        ],
       },
       {
         test: /\.css$/i,
@@ -77,6 +87,7 @@ const getConfig = (target) => ({
       : [
           new LoadablePlugin(),
           new webpack.HotModuleReplacementPlugin(),
+          new webpack.NoEmitOnErrorsPlugin(),
           new MiniCssExtractPlugin(),
         ],
   externals:

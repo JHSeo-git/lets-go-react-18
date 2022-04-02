@@ -3,9 +3,6 @@
  * @see https://github.com/DylanJu/react-pure-ssr/blob/master/src/server.tsx
  */
 import path from 'path';
-import webpackHotMiddleware from 'webpack-hot-middleware';
-import webpackDevMiddleware from 'webpack-dev-middleware';
-import webpack from 'webpack';
 import express from 'express';
 import { renderToPipeableStream } from 'react-dom/server';
 import { StaticRouter } from 'react-router-dom/server';
@@ -13,19 +10,22 @@ import { StaticRouter } from 'react-router-dom/server';
 import { ChunkExtractor } from '@loadable/server';
 import { renderHTMLJSX, renderHTMLString } from './render/renderHTML';
 
-// @ts-ignore
-import webpackConfig from '../../webpack/webpack.ssr.client.js';
-
 const development = process.env.NODE_ENV !== 'production';
 const host = process.env.HOST ?? 'localhost';
 const port = process.env.PORT ?? 3003;
 const app = express();
 
 if (development) {
+  const webpackHotMiddleware = require('webpack-hot-middleware');
+  const webpackDevMiddleware = require('webpack-dev-middleware');
+  const webpack = require('webpack');
+  const webpackConfig = require('../../webpack/webpack.ssr.client.js');
+
   const compiler = webpack(webpackConfig);
   app.use(
     webpackDevMiddleware(compiler, {
       publicPath: webpackConfig[0].output.publicPath,
+      serverSideRender: true,
       writeToDisk: true,
       stats: 'errors-only',
     })
@@ -54,23 +54,23 @@ app.get('*', (req, res) => {
     scripts: webExtractor.getScriptElements(),
   });
 
-  // const { pipe, abort } = renderToPipeableStream(htmlJSX, {
-  //   onAllReady() {
-  //     res.statusCode = 200;
-  //     pipe(res);
-  //   },
-  //   onShellError() {
-  //     res.status(500).send('Something went wrong');
-  //   },
-  // });
-  const html = renderHTMLString({
-    app: appJSX,
-    links: webExtractor.getLinkElements(),
-    styles: webExtractor.getStyleElements(),
-    scripts: webExtractor.getScriptElements(),
+  const { pipe, abort } = renderToPipeableStream(htmlJSX, {
+    onAllReady() {
+      res.statusCode = 200;
+      pipe(res);
+    },
+    onShellError() {
+      res.status(500).send('Something went wrong');
+    },
   });
+  // const html = renderHTMLString({
+  //   app: appJSX,
+  //   links: webExtractor.getLinkElements(),
+  //   styles: webExtractor.getStyleElements(),
+  //   scripts: webExtractor.getScriptElements(),
+  // });
 
-  res.status(200).send(html);
+  // res.status(200).send(html);
 });
 
 app

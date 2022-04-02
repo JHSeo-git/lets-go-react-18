@@ -15,8 +15,8 @@
     "build": "yarn csr:clean && cross-env NODE_ENV=production MODE=csr:prod webpack --progress --profile",
     "dev:ssr": "nodemon",
     "build:ssr": "yarn ssr:clean && cross-env NODE_ENV=production yarn build:client && cross-env NODE_ENV=production yarn build:server",
-    "build:client": "cross-env MODE=ssr:client webpack --profile",
-    "build:server": "cross-env MODE=ssr:server webpack --profile",
+    "build:client": "cross-env MODE=ssr:client webpack --progress --profile",
+    "build:server": "cross-env MODE=ssr:server webpack --progress --profile",
     "lint": "eslint src",
     "format": "prettier --write 'src/**/*.{ts,tsx}'"
   },
