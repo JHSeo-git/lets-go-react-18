@@ -1,0 +1,6 @@
+{
+  "ext": "ts tsx",
+  "ignore": ["**/*.(test|spec).(ts|js)"],
+  "watch": ["src/server/**/*.ts", "src/server/**/*.tsx"],
+  "exec": "cross-env NODE_ENV=development yarn build:client && yarn build:server && node dist-ssr/server.js"
+}
