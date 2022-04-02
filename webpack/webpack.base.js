@@ -1,6 +1,7 @@
-const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const packageJson = require('./package.json');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const packageJson = require('../package.json');
+const paths = require('./paths');
 
 /**
  * @type {import('webpack').Configuration}
@@ -8,8 +9,8 @@ const packageJson = require('./package.json');
 const config = {
   entry: packageJson.source,
   output: {
-    path: path.resolve(__dirname, 'dist'),
-    filename: '[name].[chunkhash].bundle.js',
+    path: paths.dist,
+    filename: '[name].[chunkhash].js',
     clean: true,
   },
   optimization: {
@@ -29,14 +30,16 @@ const config = {
       },
       {
         test: /\.css$/i,
-        use: ['style-loader', 'css-loader'],
+        use: [MiniCssExtractPlugin.loader, 'css-loader'],
       },
     ],
   },
   plugins: [
     new HtmlWebpackPlugin({
       template: './public/index.html',
+      favicon: './public/favicon.ico',
     }),
+    new MiniCssExtractPlugin(),
   ],
 };
 
