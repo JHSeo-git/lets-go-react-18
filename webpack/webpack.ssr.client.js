@@ -87,7 +87,6 @@ const getConfig = (target) => ({
       : [
           new LoadablePlugin(),
           new webpack.HotModuleReplacementPlugin(),
-          new webpack.NoEmitOnErrorsPlugin(),
           new MiniCssExtractPlugin(),
         ],
   externals:
