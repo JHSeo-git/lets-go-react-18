@@ -11,7 +11,7 @@ import { renderToPipeableStream } from 'react-dom/server';
 import { StaticRouter } from 'react-router-dom/server';
 
 import { ChunkExtractor } from '@loadable/server';
-import renderHTML from './render/renderHTML';
+import { renderHTMLJSX, renderHTMLString } from './render/renderHTML';
 
 // @ts-ignore
 import webpackConfig from '../../webpack/webpack.ssr.client.js';
@@ -47,41 +47,30 @@ app.get('*', (req, res) => {
     </StaticRouter>
   );
 
-  const htmlJSX = renderHTML({
+  const htmlJSX = renderHTMLJSX({
     app: appJSX,
     links: webExtractor.getLinkElements(),
     styles: webExtractor.getStyleElements(),
     scripts: webExtractor.getScriptElements(),
   });
 
-  const { pipe, abort } = renderToPipeableStream(htmlJSX, {
-    onAllReady() {
-      res.statusCode = 200;
-      pipe(res);
-    },
-    onShellError() {
-      res.status(500).send('Something went wrong');
-    },
+  // const { pipe, abort } = renderToPipeableStream(htmlJSX, {
+  //   onAllReady() {
+  //     res.statusCode = 200;
+  //     pipe(res);
+  //   },
+  //   onShellError() {
+  //     res.status(500).send('Something went wrong');
+  //   },
+  // });
+  const html = renderHTMLString({
+    app: appJSX,
+    links: webExtractor.getLinkElements(),
+    styles: webExtractor.getStyleElements(),
+    scripts: webExtractor.getScriptElements(),
   });
-  // const html = renderToString(
-  //   <StaticRouter location={req.url}>
-  //     <App />
-  //   </StaticRouter>
-  // );
-  // res.send(`
-  //   <!DOCTYPE html>
-  //   <html lang="ko">
-  //     <head>
-  //       <meta charset="UTF-8" />
-  //       <meta name="description" content="React 18 feature examples" />
-  //       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  //       <title>Let's go React 18</title>
-  //     </head>
-  //     <body>
-  //       <div id="app">${html}</div>
-  //     </body>
-  //   </html>
-  // `);
+
+  res.status(200).send(html);
 });
 
 app
