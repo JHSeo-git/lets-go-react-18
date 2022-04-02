@@ -1,11 +1,12 @@
 const webpack = require('webpack');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const nodeExternals = require('webpack-node-externals');
-const LoadblePlugin = require('@loadable/webpack-plugin');
+const LoadablePlugin = require('@loadable/webpack-plugin');
 const paths = require('./paths');
 
 const development = process.env.NODE_ENV !== 'production';
-const hotMiddlewareScript = 'webpack-hot-middleware/client?reload=true';
+const hotMiddlewareScript =
+  'webpack-hot-middleware/client?name=web&reload=true';
 
 const entryPoints = (target) => {
   if (target === 'node') {
@@ -36,6 +37,7 @@ const optimization = development
  */
 const getConfig = (target) => ({
   mode: development ? 'development' : 'production',
+  name: target,
   target,
   entry: entryPoints(target),
   output: {
@@ -43,17 +45,21 @@ const getConfig = (target) => ({
     filename: '[name].js',
     chunkFilename: '[name].chunk.js',
     publicPath: '/web/',
+    /**
+     * @see https://github.com/gregberge/loadable-components/issues/620#issuecomment-683392442
+     */
+    libraryTarget: target === 'node' ? 'commonjs2' : undefined,
   },
   devtool: 'source-map',
   optimization,
   resolve: {
-    extensions: ['.ts', '.tsx', '.js', '.jsx', '.json'],
+    extensions: ['.ts', '.tsx', '.js', '.jsx'],
   },
   module: {
     rules: [
       {
         test: /\.tsx?$/,
-        use: { loader: 'babel-loader' },
+        use: ['babel-loader', 'ts-loader'],
       },
       {
         test: /\.css$/i,
@@ -65,16 +71,16 @@ const getConfig = (target) => ({
     target === 'node'
       ? [
           //
-          new LoadblePlugin(),
+          new LoadablePlugin(),
           new MiniCssExtractPlugin(),
         ]
       : [
-          new LoadblePlugin(),
+          new LoadablePlugin(),
           new webpack.HotModuleReplacementPlugin(),
           new MiniCssExtractPlugin(),
         ],
   externals:
-    target === 'node' ? ['"@loadable/component"', nodeExternals()] : undefined,
+    target === 'node' ? ['@loadable/component', nodeExternals()] : undefined,
 });
 
 module.exports = [getConfig('web'), getConfig('node')];
