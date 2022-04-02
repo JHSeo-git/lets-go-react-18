@@ -24,6 +24,7 @@ const config = {
   output: {
     path: paths.serverDist,
     filename: '[name].js',
+    chunkFilename: '[name].chunk.js',
   },
   devtool: 'source-map',
   optimization,
@@ -37,7 +38,7 @@ const config = {
     rules: [
       {
         test: /\.tsx?$/,
-        use: { loader: 'babel-loader' },
+        use: ['babel-loader', 'ts-loader'],
         exclude: /node_modules/,
       },
     ],
