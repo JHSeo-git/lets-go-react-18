@@ -1,5 +1,5 @@
 import { NavLink, Route, Routes } from 'react-router-dom';
-import AutomaticBatching from './components/AutomaticBatching/AutomaticBatching';
+import AutomaticBatching from './components/AutomaticBatching';
 import Home from './components/Home';
 import Suspenses from './components/Suspenses';
 import Transitions from './components/Transitions';
