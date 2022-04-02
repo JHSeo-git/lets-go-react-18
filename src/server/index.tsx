@@ -21,6 +21,5 @@ loadableReady(() => {
 });
 
 if (module.hot) {
-  console.log('hot hot');
   module.hot.accept();
 }

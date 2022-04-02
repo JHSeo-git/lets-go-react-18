@@ -6,9 +6,12 @@ import path from 'path';
 import express from 'express';
 import { renderToPipeableStream } from 'react-dom/server';
 import { StaticRouter } from 'react-router-dom/server';
-
 import { ChunkExtractor } from '@loadable/server';
 import { renderHTMLJSX, renderHTMLString } from './render/renderHTML';
+
+import webpackHotMiddleware from 'webpack-hot-middleware';
+import webpackDevMiddleware from 'webpack-dev-middleware';
+import webpack from 'webpack';
 
 const development = process.env.NODE_ENV !== 'production';
 const host = process.env.HOST ?? 'localhost';
@@ -16,16 +19,12 @@ const port = process.env.PORT ?? 3003;
 const app = express();
 
 if (development) {
-  const webpackHotMiddleware = require('webpack-hot-middleware');
-  const webpackDevMiddleware = require('webpack-dev-middleware');
-  const webpack = require('webpack');
   const webpackConfig = require('../../webpack/webpack.ssr.client.js');
 
   const compiler = webpack(webpackConfig);
   app.use(
     webpackDevMiddleware(compiler, {
       publicPath: webpackConfig[0].output.publicPath,
-      serverSideRender: true,
       writeToDisk: true,
       stats: 'errors-only',
     })

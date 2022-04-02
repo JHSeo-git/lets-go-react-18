@@ -10,7 +10,7 @@ function App() {
     <div>
       <header>
         <nav>
-          <NavLink to="/">Home 2</NavLink>
+          <NavLink to="/">Home</NavLink>
           <NavLink to="/automatic-batching">Automatic Batching</NavLink>
           <NavLink to="/transitions">Transitions</NavLink>
           <NavLink to="/suspense">Suspense</NavLink>
