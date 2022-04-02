@@ -7,6 +7,11 @@ type Tab = 'ex1' | 'ex2';
 function Suspenses() {
   const [tab, setTab] = useState<Tab>('ex1');
 
+  // FIXME: lazy or loadable + Suspense
+  if (typeof window === 'undefined') {
+    return <div>This is Server Rendered.</div>;
+  }
+
   return (
     <article>
       <div
