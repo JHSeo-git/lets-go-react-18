@@ -1,4 +1,5 @@
 webpack*
 babel*
 dist*
+dist-ssr*
 example*
