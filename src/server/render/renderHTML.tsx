@@ -7,12 +7,12 @@ type RenderHTMLProps = {
   scripts?: React.ReactNode[];
 };
 
-export default function renderHTML({
+export const renderHTMLJSX = ({
   app,
   links,
   styles,
   scripts,
-}: RenderHTMLProps) {
+}: RenderHTMLProps) => {
   return (
     <html lang="ko">
       <head>
@@ -33,4 +33,32 @@ export default function renderHTML({
   );
 
   // return `<!DOCTYPE html>${renderToStaticMarkup(html)}`;
-}
+};
+
+export const renderHTMLString = ({
+  app,
+  links,
+  styles,
+  scripts,
+}: RenderHTMLProps) => {
+  const html = (
+    <html lang="ko">
+      <head>
+        <meta charSet="utf-8" />
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1, shrink-to-fit=no"
+        />
+        {links}
+        {styles}
+        <title>Let&apos;s go React 18 with SSR</title>
+      </head>
+      <body>
+        <div id="app">{app}</div>
+        {scripts}
+      </body>
+    </html>
+  );
+
+  return `<!DOCTYPE html>${renderToStaticMarkup(html)}`;
+};
