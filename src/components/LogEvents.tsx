@@ -1,10 +1,9 @@
-import { useLayoutEffect } from 'react';
+import { useEffect } from 'react';
 
 function LogEvents() {
-  useLayoutEffect(() => {
-    console.log('Commit');
-  });
-
+  useEffect(() => {
+    console.log('Mount');
+  }, []);
   console.log('Render');
 
   return null;
