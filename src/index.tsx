@@ -12,7 +12,7 @@ if (!container) {
 // <React.StrictMode> render twice in development mode
 ReactDOM.createRoot(container).render(
   // <React.StrictMode>
-  <BrowserRouter>
+  <BrowserRouter basename={process.env.PUBLIC_URL}>
     <App />
   </BrowserRouter>
   // </React.StrictMode>
