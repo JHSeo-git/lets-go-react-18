@@ -1,6 +1,7 @@
 const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const CopyPlugin = require('copy-webpack-plugin');
 const packageJson = require('../package.json');
 const paths = require('./paths');
 require('dotenv').config();
@@ -43,6 +44,9 @@ const config = {
     new HtmlWebpackPlugin({
       template: './public/index.html',
       favicon: './public/favicon.ico',
+    }),
+    new CopyPlugin({
+      patterns: ['./public/404.html'],
     }),
     new MiniCssExtractPlugin(),
   ],
