@@ -25,7 +25,7 @@ export const assetsParser = (manifest: AssetsManifest) => {
 
   const getScriptElements = () =>
     Object.keys(files)
-      .filter((key) => key.endsWith('.js') && !key.endsWith('.module.js'))
+      .filter((key) => key.endsWith('.js'))
       .map((key) => {
         return <script key={key} async src={files[key]}></script>;
       });
