@@ -2,18 +2,15 @@
 
 Let's go
 
-- csr
+- csr: https://jhseo-git.github.io/lets-go-react-18/
 - ssr
 
 [docs](./docs/getting-started.md)
 
-## Notice: Webpack-hmr in server-side projects work, but with many errors
+## Notice: Webpack-hmr in my server-side projects work, but with many errors
 
 > Have to fix it in ssr
 
 ## TODO
 
-- [ ] fix webpack, babel, scripts etc...
-- [ ] fix ssr several errors
-- [ ] change loadable to lazy
 - [ ] ...
