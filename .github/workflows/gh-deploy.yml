@@ -27,7 +27,7 @@ jobs:
             ${{ runner.os }}-yarn-
 
       - run: |
-          echo "PUBLIC_URL=https://jhseo-git.github.io/lets-go-react-18/" > .env
+          echo "PUBLIC_URL=/lets-go-react-18" > .env
       - run: yarn install --frozen-lockfile
       - run: yarn build
 
