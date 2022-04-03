@@ -45,11 +45,25 @@ const config = {
             options: {
               compilerOptions: {
                 noEmit: false,
+                composite: false,
               },
             },
           },
         ],
         exclude: /node_modules/,
+      },
+      {
+        test: /\.css$/,
+        use: [
+          {
+            loader: 'css-loader',
+            options: {
+              modules: {
+                exportOnlyLocals: true,
+              },
+            },
+          },
+        ],
       },
     ],
   },

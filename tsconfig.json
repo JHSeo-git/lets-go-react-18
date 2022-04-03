@@ -15,7 +15,7 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
-    // "composite": true,
+    "composite": true,
     "jsx": "preserve",
     "types": ["node", "react/next", "react-dom/next"]
   },

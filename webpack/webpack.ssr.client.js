@@ -1,7 +1,7 @@
 const webpack = require('webpack');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const { WebpackManifestPlugin } = require('webpack-manifest-plugin');
 const nodeExternals = require('webpack-node-externals');
-const LoadablePlugin = require('@loadable/webpack-plugin');
 const paths = require('./paths');
 
 const development = process.env.NODE_ENV !== 'production';
@@ -44,11 +44,7 @@ const getConfig = (target) => ({
     path: `${paths.serverDist}/${target}`,
     filename: '[name].js',
     chunkFilename: '[name].chunk.js',
-    publicPath: '/web/',
-    /**
-     * @see https://github.com/gregberge/loadable-components/issues/620#issuecomment-683392442
-     */
-    libraryTarget: target === 'node' ? 'commonjs2' : undefined,
+    publicPath: paths.clientPublicPathOrUrl,
   },
   devtool: 'source-map',
   optimization,
@@ -66,6 +62,7 @@ const getConfig = (target) => ({
             options: {
               compilerOptions: {
                 noEmit: false,
+                composite: false,
               },
             },
           },
@@ -81,16 +78,31 @@ const getConfig = (target) => ({
     target === 'node'
       ? [
           //
-          new LoadablePlugin(),
           new MiniCssExtractPlugin(),
         ]
       : [
-          new LoadablePlugin(),
-          new webpack.HotModuleReplacementPlugin(),
           new MiniCssExtractPlugin(),
+          new webpack.HotModuleReplacementPlugin(),
+          new WebpackManifestPlugin({
+            fileName: 'asset-manifest.json',
+            publicPath: paths.clientPublicPathOrUrl,
+            generate: (seed, files, entrypoints) => {
+              const manifestFiles = files.reduce((manifest, file) => {
+                manifest[file.name] = file.path;
+                return manifest;
+              }, seed);
+              const entrypointFiles = entrypoints.main.filter(
+                (fileName) => !fileName.endsWith('.map')
+              );
+
+              return {
+                files: manifestFiles,
+                entrypoints: entrypointFiles,
+              };
+            },
+          }),
         ],
-  externals:
-    target === 'node' ? ['@loadable/component', nodeExternals()] : undefined,
+  externals: target === 'node' ? [nodeExternals()] : undefined,
 });
 
 module.exports = [getConfig('web'), getConfig('node')];

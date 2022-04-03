@@ -1,17 +1,19 @@
 /**
  * @see https://minoo.medium.com/react-typescript-ssr-code-splitting-%ED%99%98%EA%B2%BD%EC%84%A4%EC%A0%95%ED%95%98%EA%B8%B0-d8cec9567871
  * @see https://github.com/DylanJu/react-pure-ssr/blob/master/src/server.tsx
+ * @see https://codesandbox.io/s/kind-sammet-j56ro?file=/src/App.js
  */
 import path from 'path';
 import express from 'express';
 import { renderToPipeableStream } from 'react-dom/server';
 import { StaticRouter } from 'react-router-dom/server';
-import { ChunkExtractor } from '@loadable/server';
-import { renderHTMLJSX, renderHTMLString } from './render/renderHTML';
+import { renderHTMLJSX } from './lib/renderHTML';
 
 import webpackHotMiddleware from 'webpack-hot-middleware';
 import webpackDevMiddleware from 'webpack-dev-middleware';
 import webpack from 'webpack';
+import App from '../App';
+import { assetsParser } from './lib/assetParser';
 
 const development = process.env.NODE_ENV !== 'production';
 const host = process.env.HOST ?? 'localhost';
@@ -33,24 +35,29 @@ if (development) {
 }
 
 app.use(express.static(path.resolve(__dirname)));
-app.get('*', (req, res) => {
-  const nodeStats = path.resolve(__dirname, './node/loadable-stats.json');
-  const webStats = path.resolve(__dirname, './web/loadable-stats.json');
-  const nodeExtractor = new ChunkExtractor({ statsFile: nodeStats });
-  const webExtractor = new ChunkExtractor({ statsFile: webStats });
-  const { default: App } = nodeExtractor.requireEntrypoint();
+app.use('/favicon.ico', express.static('public/favicon.ico'));
 
-  const appJSX = webExtractor.collectChunks(
+const assetManifest = require('../../dist-ssr/web/asset-manifest.json');
+
+app.get('*', (req, res) => {
+  const appJSX = (
     <StaticRouter location={req.url}>
       <App />
     </StaticRouter>
   );
 
+  const parsed = assetsParser(assetManifest);
+
   const htmlJSX = renderHTMLJSX({
     app: appJSX,
-    links: webExtractor.getLinkElements(),
-    styles: webExtractor.getStyleElements(),
-    scripts: webExtractor.getScriptElements(),
+    links: parsed.getLinkElements(),
+    styles: parsed.getStyleElements(),
+    scripts: parsed.getScriptElements(),
+  });
+
+  // The new wiring is a bit more involved.
+  res.socket?.on('error', (error) => {
+    console.error('Fatal', error);
   });
 
   const { pipe, abort } = renderToPipeableStream(htmlJSX, {
@@ -62,15 +69,50 @@ app.get('*', (req, res) => {
       res.status(500).send('Something went wrong');
     },
   });
-  // const html = renderHTMLString({
-  //   app: appJSX,
-  //   links: webExtractor.getLinkElements(),
-  //   styles: webExtractor.getStyleElements(),
-  //   scripts: webExtractor.getScriptElements(),
-  // });
-
-  // res.status(200).send(html);
 });
+// app.get('*', (req, res) => {
+//   const nodeStats = path.resolve(__dirname, './node/loadable-stats.json');
+//   const webStats = path.resolve(__dirname, './web/loadable-stats.json');
+//   const nodeExtractor = new ChunkExtractor({ statsFile: nodeStats });
+//   const webExtractor = new ChunkExtractor({ statsFile: webStats });
+//   const { default: App } = nodeExtractor.requireEntrypoint();
+
+//   const appJSX = webExtractor.collectChunks(
+//     <StaticRouter location={req.url}>
+//       <App />
+//     </StaticRouter>
+//   );
+
+//   const htmlJSX = renderHTMLJSX({
+//     app: appJSX,
+//     links: webExtractor.getLinkElements(),
+//     styles: webExtractor.getStyleElements(),
+//     scripts: webExtractor.getScriptElements(),
+//   });
+
+//   // The new wiring is a bit more involved.
+//   res.socket?.on('error', (error) => {
+//     console.error('Fatal', error);
+//   });
+
+//   const { pipe, abort } = renderToPipeableStream(htmlJSX, {
+//     onAllReady() {
+//       res.statusCode = 200;
+//       pipe(res);
+//     },
+//     onShellError() {
+//       res.status(500).send('Something went wrong');
+//     },
+//   });
+//   // const html = renderHTMLString({
+//   //   app: appJSX,
+//   //   links: webExtractor.getLinkElements(),
+//   //   styles: webExtractor.getStyleElements(),
+//   //   scripts: webExtractor.getScriptElements(),
+//   // });
+
+//   // res.status(200).send(html);
+// });
 
 app
   .listen(port, () => {

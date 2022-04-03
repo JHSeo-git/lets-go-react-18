@@ -10,6 +10,7 @@ module.exports = {
   src,
   client,
   server,
+  clientPublicPathOrUrl: '/web/',
   nodeModules: resolve(root, 'node_modules'),
   dist: resolve(root, 'dist'),
   serverDist: resolve(root, 'dist-ssr'),

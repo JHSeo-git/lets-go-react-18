@@ -24,6 +24,6 @@ module.exports = (api) => {
         },
       ],
     ],
-    plugins: ['@loadable/babel-plugin', '@babel/plugin-transform-runtime'],
+    plugins: ['@babel/plugin-transform-runtime'],
   };
 };
