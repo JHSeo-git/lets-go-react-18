@@ -9,7 +9,7 @@
   "source": "./src/index.tsx",
   "main": "./dist/index.js",
   "scripts": {
-    "csr:clean": "rimraf dis",
+    "csr:clean": "rimraf dist",
     "ssr:clean": "rimraf dist-ssr",
     "dev": "cross-env NODE_ENV=development MODE=csr:dev webpack serve --open",
     "build": "yarn csr:clean && cross-env NODE_ENV=production MODE=csr:prod webpack --progress=profile",
