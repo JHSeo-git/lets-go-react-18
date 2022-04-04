@@ -14,7 +14,7 @@ function StoryWithData({ id }: { id: string }) {
       try {
         setLoading(true);
 
-        const data = await fetchData(`item/${Number(id)}`, 0);
+        const data = await fetchData<Item>(`item/${Number(id)}`, 0);
         setData(data);
       } catch (e) {
         setError(e as unknown as Error);
@@ -43,7 +43,7 @@ function NewsWithData({ count = 30 }: { count?: number }) {
       try {
         setLoading(true);
 
-        const ids = await fetchData('topstories', 500);
+        const ids = await fetchData<string[]>('topstories', 500);
         setStoryIds(ids);
       } catch (e) {
         setError(e as unknown as Error);

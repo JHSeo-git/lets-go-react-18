@@ -6,13 +6,13 @@ import { useData } from './Suspenses.hooks';
 import { Item } from './Suspenses.types';
 
 function StoryWithData({ id }: { id: string }) {
-  const data = useData<Item>(`s-${id}`, () => fetchData(`item/${Number(id)}`));
+  const data = useData(`s-${id}`, () => fetchData<Item>(`item/${Number(id)}`));
 
   return <Story item={data} />;
 }
 
 function NewsWithData({ count = 30 }: { count?: number }) {
-  const storyIds = useData<string[]>('top', () => fetchData('topstories', 500));
+  const storyIds = useData('top', () => fetchData<string[]>('topstories', 500));
 
   return (
     <ol>

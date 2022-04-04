@@ -1,7 +1,11 @@
 /**
+ * loadable-component
  * @see https://minoo.medium.com/react-typescript-ssr-code-splitting-%ED%99%98%EA%B2%BD%EC%84%A4%EC%A0%95%ED%95%98%EA%B8%B0-d8cec9567871
  * @see https://github.com/DylanJu/react-pure-ssr/blob/master/src/server.tsx
+ *
+ * vanilla
  * @see https://codesandbox.io/s/kind-sammet-j56ro?file=/src/App.js
+ * @see https://github.com/facebook/react/blob/main/fixtures/ssr2/README.md
  */
 import path from 'path';
 import express from 'express';
@@ -87,49 +91,6 @@ app.get('*', (req, res) => {
   // Try lowering this to see the client recover.
   setTimeout(abort, 10000);
 });
-// app.get('*', (req, res) => {
-//   const nodeStats = path.resolve(__dirname, './node/loadable-stats.json');
-//   const webStats = path.resolve(__dirname, './web/loadable-stats.json');
-//   const nodeExtractor = new ChunkExtractor({ statsFile: nodeStats });
-//   const webExtractor = new ChunkExtractor({ statsFile: webStats });
-//   const { default: App } = nodeExtractor.requireEntrypoint();
-
-//   const appJSX = webExtractor.collectChunks(
-//     <StaticRouter location={req.url}>
-//       <App />
-//     </StaticRouter>
-//   );
-
-//   const htmlJSX = renderHTMLJSX({
-//     app: appJSX,
-//     links: webExtractor.getLinkElements(),
-//     styles: webExtractor.getStyleElements(),
-//     scripts: webExtractor.getScriptElements(),
-//   });
-
-//   // The new wiring is a bit more involved.
-//   res.socket?.on('error', (error) => {
-//     console.error('Fatal', error);
-//   });
-
-//   const { pipe, abort } = renderToPipeableStream(htmlJSX, {
-//     onAllReady() {
-//       res.statusCode = 200;
-//       pipe(res);
-//     },
-//     onShellError() {
-//       res.status(500).send('Something went wrong');
-//     },
-//   });
-//   // const html = renderHTMLString({
-//   //   app: appJSX,
-//   //   links: webExtractor.getLinkElements(),
-//   //   styles: webExtractor.getStyleElements(),
-//   //   scripts: webExtractor.getScriptElements(),
-//   // });
-
-//   // res.status(200).send(html);
-// });
 
 app
   .listen(port, () => {
