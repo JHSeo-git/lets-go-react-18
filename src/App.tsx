@@ -5,6 +5,7 @@ import AutomaticBatching from './components/AutomaticBatching';
 import Home from './components/Home';
 import Suspenses from './components/Suspenses';
 import Transitions from './components/Transitions';
+import ErrorComponent from './components/ErrorComponent';
 import './styles.css';
 
 function App() {
@@ -34,15 +35,6 @@ function App() {
         </div>
       </ErrorBoundary>
     </Suspense>
-  );
-}
-
-function ErrorComponent({ error }: { error: Error }) {
-  return (
-    <div>
-      <h1>Application Error</h1>
-      <pre style={{ whiteSpace: 'pre-wrap' }}>{error.stack}</pre>
-    </div>
   );
 }
 
