@@ -37,16 +37,15 @@ if (development) {
 app.use(express.static(path.resolve(__dirname)));
 app.use('/favicon.ico', express.static('public/favicon.ico'));
 
-const assetManifest = require('../../dist-ssr/web/asset-manifest.json');
-
 app.get('*', (req, res) => {
+  const assetManifest = require('../../dist-ssr/web/asset-manifest.json');
+  const parsed = assetsParser(assetManifest);
+
   const appJSX = (
     <StaticRouter location={req.url}>
       <App />
     </StaticRouter>
   );
-
-  const parsed = assetsParser(assetManifest);
 
   const htmlJSX = renderHTMLJSX({
     app: appJSX,
@@ -60,15 +59,33 @@ app.get('*', (req, res) => {
     console.error('Fatal', error);
   });
 
+  let didError = false;
   const { pipe, abort } = renderToPipeableStream(htmlJSX, {
     onAllReady() {
-      res.statusCode = 200;
+      // Full completion.
+      // You can use this for SSG or crawlers.
+      // res.statusCode = 200;
+      // pipe(res);
+    },
+    onShellReady() {
+      // If something errored before we started streaming, we set the error code appropriately.
+      res.statusCode = didError ? 500 : 200;
+      res.setHeader('Content-type', 'text/html');
       pipe(res);
     },
     onShellError() {
       res.status(500).send('Something went wrong');
     },
+    onError(error) {
+      didError = true;
+      console.error(error);
+      abort();
+    },
   });
+
+  // Abandon and switch to client rendering if enough time passes.
+  // Try lowering this to see the client recover.
+  setTimeout(abort, 10000);
 });
 // app.get('*', (req, res) => {
 //   const nodeStats = path.resolve(__dirname, './node/loadable-stats.json');
