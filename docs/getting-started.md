@@ -23,6 +23,8 @@ React 18 변화를 한 단어로 정리하자면 Concurrency 입니다.
 - [automatic batching](#automatic-batching)
 - [transitions](#transitions)
 - [suspense](#suspense)
+- [new client and server rendering APIs](#new-client-and-server-rendering-apis)
+- [new hooks](#new-hooks)
 
 ## automatic batching
 
@@ -398,3 +400,366 @@ React 18은 SSR에 2가지 주요 기능을 제공합니다.
 React 내부에서 자동으로 이루어지며 대부분의 기존 React 코드와 함께 작동할 것으로 기대합니다. 이것은 loading state를 선언적으로 표현하는 힘을 보여줍니다.
 
 `if (isloading)`에서 `<Suspense>`로 바꾸는 것이 큰 차이로 보이진 않지만, 이러한 모든 개선사항을 잠금해제하는 중요한 변화입니다.
+
+## new client and server rendering APIs
+
+React 18에서 client와 server에서 렌더링하기 위한 APIs가 새롭게 디자인되었습니다.
+
+### React DOM Client
+
+```jsx
+import ... from 'react-dom/client';
+```
+
+`react-dom/client`에서 제공되는 새로운 APIs는 다음과 같습니다.
+
+- `createRoot`: `render` 또는 `unmount`를 위한 root를 만드는 새로운 method입니다. `ReactDOM.render` 대신에 `createRoot`를 사용하세요. React 18의 새로운 기능들은 이것 없이는 동작하지 않습니다.
+- `hydrateRoot`: 서버 렌더링 어플리케이션을 hydrate하는 새로운 방법입니다. `ReactDOM.hydrate` 대신에 새로운 React DOM Server APIs와 함께 동작할 `hydrateRoot`를 사용하세요. 마찬가지로 React 18의 새로운 기능들은 이것 없이 동작하지 않습니다.
+
+#### createRoot
+
+```jsx
+import { createRoot } from 'react-dom/client';
+
+const container = document.getElementById('...');
+const root = createRoot(container);
+root.render(element);
+```
+
+```jsx
+createRoot(container[, options]);
+```
+
+```jsx
+root.umount();
+```
+
+`createRoot()`는 전달된 container node의 content를 제어합니다. 내부의 기존 DOM element는 render가 호출될 때 교체됩니다. 이후 호출은 효율적인 업데이틑 뤼해 React의 DOM diffing 알고리즘을 사용합니다.
+container node는 수정될 수 없으며 오직 container의 chilren만 수정가능합니다. 기존 children을 덮어쓰지 않고 기존 DOM node에 component에 삽입할 수 있습니다.
+`createRoot()`는 서버에서 렌더링된 container를 hydrate하는데 사용하는 것은 지원되지 않습니다. 대신 `hydrateRoot()`를 사용하세요.
+
+`createRoot`는 두 가지 옵션을 제공하는데 다음과 같습니다.
+
+- `onRecoverableError`: 렌더링 시에 오류로 인해 React가 자동으로 recover할 때 호출되는 callback 입니다.
+- `identifierPrefix`: `React.useId` hook에 의해 생성된 ids를 위해 사용되는 prefix입니다. 같은 페이지에 다수의 root를 사용할 때 conflict를 피할 때 유용합니다. 서버에서 사용된 것과 동일한 prefix여야 합니다.
+
+root에서는 `unmount`를 호출하여 마운트 해제할 수도 있습니다.
+
+#### hydrateRoot
+
+```jsx
+import { hydrateRoot } from 'react-dom/client';
+import App from './App';
+
+const container = document.getElementById('...');
+hydrateRoot(container, <App />);
+```
+
+```jsx
+hydrateRoot(element, container[, options])
+```
+
+`hydrateRoot()`는 `createRoot()`와 거의 같습니다. 그러나 `ReactDOMServer`에서 렌더링된 container의 HTML contents를 hydrate하는데 사용됩니다. React는 기존 markup에 이벤트 리스터를 붙이려고 시도합니다.
+
+`createRoot`, `hydrateRoot` 둘 다 `onRecoverableError` 라고 불리는 옵션을 가집니다. 이 옵션은 React가 rendering이나 hydration 하는 동안에 발생한 오류로부터 recover할 때 로깅을 위해 알림을 받을 수 있습니다. 기본적으로 React는 WEB APIs에서 제공하는 [reportError](https://developer.mozilla.org/en-US/docs/Web/API/reportError)를 사용합니다. 오래된 브라우저에서는 `console.error`를 사용합니다.
+
+> reportError  
+> ![reportError](./images/reportError.png)
+
+`createRoot`와 마찬가지로 `hydrateRoot`도 두 가지 옵션을 동일하게 제공합니다.
+
+- `onRecoverableError`: 렌더링 시에 오류로 인해 React가 자동으로 recover할 때 호출되는 callback 입니다.
+- `identifierPrefix`: `React.useId` hook에 의해 생성된 ids를 위해 사용되는 prefix입니다. 같은 페이지에 다수의 root를 사용할 때 conflict를 피할 때 유용합니다. 서버에서 사용된 것과 동일한 prefix여야 합니다.
+
+> Note:  
+> React는 렌더링된 content가 서버와 클라이언트 간에 동일한 것으로 예상합니다. 텍스트 내용의 차이점을 해결할 순 있지만 불일치를 버그로 처리하고 수정해야 합니다. 개발 모드에서 React는 hydrate 중 불일치에 대해 경고합니다. 일치하지 않는 경우 attribute 차이가 해결된다는 보장이 없습니다. 이는 대부분의 앱에서 불일치가 드물고 모든 markup을 검증하는데 엄청난 비용이 들기 때문에 성능상의 이유로 중요합니다.
+
+### React DOM Server
+
+`react-dom/server`에서 제공되는 새로운 APIs는 서버에서 streaming Suspense를 완전히 지원합니다.
+
+- `renderToPipeableStream`: **Node**에서 streaming을 위해서.
+- `renderToReadableStream`: Deno와 Cloudflare workes처럼 modern **edge runtim**을 위해서.
+
+기존 `renderToString` method는 여전히 동작하지만 권장되지 않습니다.
+
+다음 method는 server와 browser환경에서 둘 다 사용될 수 있습니다.
+
+- `renderToString()`: HTML string을 반환합니다.
+- `renderToStaticMarkup()`: `renderToString`과 흡사합니다만 React가 내부적으로 사용하는 `data-reactroot`같은 추가 DOM attribute를 만들지 않습니다.
+
+다음 method는 `stream` package에 의존하고 있어서 **오직 서버에서만 사용할 수 있고** browser에서는 동작하지 않습니다.
+
+- `renderToPipeableStream()`: React 18에서 추가되었으며 서버에서 streaming을 위해서 사용합니다.
+- `renderToReadableStream()`: `renderToReadableStream`과 흡사하나 Deno와 Cloudflare workes처럼 modern **edge runtim**을 위해서 사용합니다.
+- `renderToNodeStream()`(Deprecated)
+- `renderToStaticNodeStream()`
+
+#### renderToString
+
+```jsx
+import ReactDOMServer from 'react-dom/server';
+
+ReactDOMServer.renderToString(element);
+```
+
+React element를 초기 HTML로 렌더링합니다. React는 HTML string을 반환합니다. 이 방법은 서버에서 HTML을 생성하고, 최초 요청에서 더 빠른 페이지 로드를 makrup을 내려보내고, SEO 목적으로 페이지를 크롤링되도록 하는데 사용할 수 있습니다.
+
+만약 이미 서버에서 렌더링한 markup을 가진 node에서 `ReactDOM.hydrateRoot()`를 호출한다면, React는 이를 보존하고 이벤트 핸들러만 연결하므로 매우 성능이 좋은 first-load 경험을 할 수 있습니다.
+
+#### renderToStaticMarkup
+
+```jsx
+import ReactDOMServer from 'react-dom/server';
+
+ReactDOMServer.renderToStaticMarkup(element);
+```
+
+`renderToString`과 흡사하나 React가 내부적으로 사용하는 `data-reactroot`같은 추가 DOM attribute를 만들지 않습니다. 추가 attribute를 제거하면 일부 바이트를 절약할 수 있어 React를 간단한 정적 페이지 생성기로 사용할 때 유용합니다.
+
+상호작용가능한 markup을 만들 때는 사용하지 마세요. 대신에 서버에서 `renderToString`를 사용하고 클라이언트에서 `ReactDOM.hydrateRoot()`를 사용하세요
+
+#### renderToPipeableStream
+
+```jsx
+import ReactDOMServer from 'react-dom/server';
+
+ReactDOMServer.renderToPipeableStream(element, options);
+```
+
+```tsx
+type Controls = {|
+  // Cancel any pending I/O and put anything remaining into
+  // client rendered mode.
+  abort(): void,
+  pipe<T: Writable>(destination: T): T,
+|};
+
+type Options = {|
+  identifierPrefix?: string,
+  namespaceURI?: string,
+  nonce?: string,
+  bootstrapScriptContent?: string,
+  bootstrapScripts?: Array<string>,
+  bootstrapModules?: Array<string>,
+  progressiveChunkSize?: number,
+  onShellReady?: () => void,
+  onShellError?: () => void,
+  onAllReady?: () => void,
+  onError?: (error: mixed) => void,
+|};
+
+function renderToPipeableStream(
+  children: ReactNodeList,
+  options?: Options,
+): Controls {
+  // ...
+}
+```
+
+```jsx
+const { pipe, abort } = renderToPipeableStream(<App />, {
+  onAllReady() {
+    res.statusCode = 200;
+    res.setHeader('Content-type', 'text/html');
+    pipe(res);
+  },
+  onShellError(x) {
+    res.statusCode = 500;
+    res.send(
+      '<!doctype html><p>Loading...</p><script src="clientrender.js"></script>'
+    );
+  },
+});
+```
+
+React element를 초기 HTML로 렌더링합니다. output을 pipe하거나 abort할 수 있는 [Control object](https://github.com/facebook/react/blob/3f8990898309c61c817fbf663f5221d9a00d0eaa/packages/react-dom/src/server/ReactDOMFizzServerNode.js#L49-L54)를 반환합니다. 이후에 JavaScript 실행을 통해서 들어갈 "지연된" content block이 나중에 JavaScript 실행을 통해 "Popping in"되는 Suspense와 HTML streaming을 완벽하게 지원합니다.
+
+> Note:
+> Node.js에 특화된 API입니다. modern server(edge runtime)에서는 `renderToReadableStream`을 사용하세요.
+
+#### renderToReadableStream
+
+```jsx
+ReactDOMServer.renderToReadableStream(element, options);
+```
+
+```jsx
+let controller = new AbortController();
+try {
+  let stream = await renderToReadableStream(
+    <html>
+      <body>Success</body>
+    </html>,
+    {
+      signal: controller.signal,
+    }
+  );
+
+  // This is to wait for all suspense boundaries to be ready. You can uncomment
+  // this line if you don't want to stream to the client
+  // await stream.allReady;
+
+  return new Response(stream, {
+    headers: { 'Content-Type': 'text/html' },
+  });
+} catch (error) {
+  return new Response(
+    '<!doctype html><p>Loading...</p><script src="clientrender.js"></script>',
+    {
+      status: 500,
+      headers: { 'Content-Type': 'text/html' },
+    }
+  );
+}
+```
+
+React element를 초기 HTML로 렌더링합니다. [Readable Stream](https://developer.mozilla.org/en-US/docs/Web/API/ReadableStream)을 반환합니다. Suspense와 HTML streaming을 완벽하게 지원합니다.
+
+#### renderToNodeStream(depreacated)
+
+React 18이 되면서 depcreated 되었고, `renderToPipeableStream`로 업그레이드하여 사용하라고 권장합니다.
+
+#### renderToStaticNodeStream
+
+```jsx
+ReactDOMServer.renderToStaticNodeStream(element);
+```
+
+`renderToPipeableStream`이나 `renderToReadableStream`과 비슷하지만, `renderToStaticMarkup`처럼 React가 내부적으로 사용하는 `data-reactroot`같은 추가 DOM attribute를 만들지 않습니다.
+
+이 stream에 의한 HTML output은 `renderToStaticMarkup` 결과와 완전하게 동일합니다.
+
+## new hooks
+
+- `useId`: hydrate 불일치를 피하면서 클라이언트와 서버 모두에서 unique ID를 생성하기 위한 hook 입니다.
+- `useTransition`: 일부 상태 업데이트를 non-urgent한 것으로 다루기 위한 hook 입니다.
+- `useDeferredValue`: non-urgent한 부분을 re-rendering하는 것을 지연할 때 사용하는 hook 입니다.
+- `useSyncExternalStroe`: store 상태를 동기식으로 업데이트 하도록 강제하여 해당 store(redux store같은)가 concurrent mode에서도 잘 동작할 수 있도록 하는 hook입니다.
+- `useInsertionEffect`: CSS-in-JS 라이브러리가 렌더링할 때 스타일을 삽입하는 것에서의 성능 문제를 해결할 수 있도록 하는 hook입니다.
+
+### useId
+
+hydrate 불일치를 피하면서 클라이언트와 서버 모두에서 unique ID를 생성하기 위한 hook 입니다.
+
+unique ID가 필요한 accessibility API를 사용하는 component 라이브러리에서 주로 유용합니다.
+
+React 17이하에서 기존에 존재하던 이슈들을 해결합니다. 그러나 새로운 streaming 서버 renderer가 HTML을 순서 없이 전달하는 방식 때문에 React 18에서 훨씬 더 중요합니다.
+
+```jsx
+function Checkbox() {
+  const id = useId();
+  return (
+    <>
+      <label htmlFor={id}>Do you like React?</label>
+      <input id={id} type="checkbox" name="react" />
+    </>
+  );
+}
+
+function NameFields() {
+  const id = useId();
+  return (
+    <div>
+      <label htmlFor={id + '-firstName'}>First Name</label>
+      <div>
+        <input id={id + '-firstName'} type="text" />
+      </div>
+      <label htmlFor={id + '-lastName'}>Last Name</label>
+      <div>
+        <input id={id + '-lastName'} type="text" />
+      </div>
+    </div>
+  );
+}
+```
+
+> Note:  
+> `useId`는 `:` 토큰을 포함하는 문자열을 생성합니다. 이렇게 하면 token이 고유한지 확인하는데 도움이 되지만 CSS selector나 querySelectorAll과 같은 API에서는 지원되지 않습니다.
+>
+> `useId`는 multi-root 앱에서 충돌을 피하기 위해 `identifierPrefix`를 지원합니다. `hydrateRoot` 옵션을 확인하세요.
+
+### useTransition
+
+`useTransition`과 `startTransition`은 non-urgent한 상태 업데이트를 mark 할 수 있도록 해줍니다.
+
+자세한 내용은 [앞선 내용](#transitions)을 참고하세요.
+
+### useDeferredValue
+
+`useDeferredValue`는 더 긴급한 업데이트를 위해 지연될 값의 복사본을 반환합니다.
+현재 렌더링이 사용자 input과 같은 긴급한(urgent) 업데이트인 경우 React는 이전 값을 반환한 다음 긴급한 렌더링이 완료된 후 새로운 값을 렌더링합니다.
+
+지연 업데이트를 위해 debouncing이나 throttling를 사용하는 사용자 hook과 비슷합니다.
+React에서 `useDeferredValue`를 사용하는 이점은 다른 작업이 완료되자마자(일정한 시간을 기다려야하는 것과 달리) 업데이트가 바로 동작할 것이라는 점입니다. 그리고 `startTransition`과 같이, 기존 content를 위해 예기치 않은 fallback을 트리거하지 않고 deferred 값을 suspense할 수 있습니다.
+
+#### Memoizing deferred children
+
+`useDeferredValue`에서 전달한 값만 지연하기 때문에 urgent update 중에 children이 re-rendering되는 것을 방지하려면 해당 부분을 `React.memo` 또는 `React.useMemo`로 memoizing 해야 합니다.
+
+```jsx
+function Typeahead() {
+  const query = useSearchQuery('');
+  const deferredQuery = useDeferredValue(query);
+
+  // memoizing은 React에게 query가 바뀔 때가 아닌
+  // dependency로 등록된 deferredQuery가 바뀔 때 렌더링하도록 알려줍니다.
+  const suggestions = useMemo(
+    () => <SearchSuggestions query={deferredQuery} />,
+    [deferredQuery]
+  );
+
+  return (
+    <>
+      <SearchInput query={query} />
+      <Suspense fallback="Loading results...">{suggestions}</Suspense>
+    </>
+  );
+}
+```
+
+### useSyncExternalStore
+
+store 상태를 동기식으로 업데이트 하도록 강제하여 해당 store(redux store같은)가 concurrent mode에서도 잘 동작할 수 있도록 하는 hook입니다. 이것은 외부 data source에 구독을 구현할 때 useEffect가 필요하지 않고 React 외부의 상태와 통합되는 모든 라이브러리에 권장됩니다.
+
+> Note: `useSyncExternalStore`는 앱 코드가 아니라 라이브러리에서 사용하기 위한 것입니다.
+
+```jsx
+const state = useSyncExternalStore(subscribe, getSnapshot[, getServerSnapshot]);
+
+// 전체 스토어 구독
+const state = useSyncExternalStore(store.subscribe, store.getSnapshot);
+
+// 특정 필드 구독
+const selectedField = useSyncExternalStore(
+  store.subscribe,
+  () => store.getSnapshot().selectedField,
+);
+
+// 서버 렌더링시에 서버에서 사용되는 store 값을 serialize 가 필요하고 그것을 제공 해야 합니다.
+// hydration 동안 server 불일치를 막기 위해서 사용됩니다.
+const selectedField = useSyncExternalStore(
+  store.subscribe,
+  () => store.getSnapshot().selectedField,
+  () => INITIAL_SERVER_SNAPSHOT.selectedField,
+);
+```
+
+- subscribe: 스토어가 변경될 때마다 호출되는 콜백을 등록하는 함수
+- getSnapshot: 스토어의 현재 값을 반환하는 함수
+- getServerSnapshot: 서버 렌더링 중에 사용된 snapshot을 반환하는 함수
+
+### useInsertionEffect
+
+CSS-in-JS 라이브러리가 렌더링할 때 스타일을 삽입하는 것에서의 성능 문제를 해결할 수 있도록 하는 hook입니다. CSS-in-JS를 이미 만들지 않았다면 이것을 사용하지 않을 것입니다. 이 hook은 DOM이 변경된 이후에 실행되지만 layout effect가 새로운 layout을 읽기 전에 실행됩니다.
+이것은 React 17이하에 이미 존재하는 문제를 해결합니다. 그러나 React가 concurrent 렌더링 동안에 브라우저에게 layout을 재계산할 수 있도록 하기 때문에 React 18에서 더 중요합니다.
+
+> Note: `useSyncExternalStore`는 앱 코드가 아니라 라이브러리에서 사용하기 위한 것입니다.
+
+```jsx
+useInsertionEffect(didUpdate);
+```
+
+signature는 `useEffect`와 동일합니다. 그러나 모든 DOM _변경 전에_ 동기적으로 실행됩니다. `useLayoutEffect`에서 layout을 읽기 전에 DOM안에 스타일을 삽입하기 위해 이것을 사용하세요. 이 hook은 범위가 제한되어 있어서 ref에 엑세스할 수 없으며 업데이트를 예약 할 수도 없습니다.
+
+> Note: `useInsertionEffect`는 css-in-js 라이브러리 작성자만 사용해야 합니다. `useEffect`나 `useLayoutEffect` 대신에 더 선호됩니다.
