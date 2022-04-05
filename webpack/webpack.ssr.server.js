@@ -29,9 +29,6 @@ const config = {
   devtool: 'source-map',
   optimization,
   resolve: {
-    fallback: {
-      path: require.resolve('path-browserify'),
-    },
     extensions: ['.js', '.jsx', '.ts', '.tsx'],
   },
   module: {
