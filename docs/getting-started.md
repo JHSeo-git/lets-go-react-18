@@ -226,8 +226,9 @@ SSR을 사용하지 않는 경우 JavaScript가 로드되는 동안 사용자에
 
 SSR을 사용하여 React components를 HTML로 렌더링하여 사용자에게 보냅니다. 그러나 HTML은 매우 상호작용적이지 않습니다.(link, form, 등 간단한 built-in Web interactive 등 제외, 만약 build-in Web interactive로만 작성되었다면 이런 문제는 없습니다.) 하지만 장점으로는 JavaScript가 로드되는 동안(hydration) 사용자는 화면에 _무언가를 볼 수 있다는 것입니다._
 
-위 사진에서 회색 표시는 완전히 상호작용하지 않는다는 것을 나타냅니다. 만약 그 부분에 상호작용이 필요한 JavaScript 코드가 있다면 이벤트를 호출(클릭과 같은)하더라도 아무 작업도 수행되지 않습니다.
-그러면 CSR과 차이가 없는거 아닐까요?? JavaScript를 로드하는 시간은 CSR과 동일한데 SSR 시간이 추가가 된 거 아닌가요?
+위 사진에서 회색 표시는 완전히 상호작용하지 않는다는 것을 나타냅니다. 만약 그 부분에 상호작용이 필요한 JavaScript 코드가 있다면 이벤트를 호출(클릭과 같은)하더라도 아무 작업도 수행되지 않습니다.  
+그러면 CSR과 차이가 없는거 아닐까요? JavaScript를 로드하는 시간은 CSR과 동일한데 SSR 시간이 추가가 된 거 아닌가요?
+
 **그러나 특히 콘텐츠가 많은 웹 사이트의 경우 SSR은 JavaScript가 로드되는 동안 연결 상태가 좋지 않은 사용자가 콘텐츠를 읽거나 볼 수 있도록 하기 때문에 매우 유용합니다.**
 또한 CSR과 달리 메모리에 컴포넌트 트리를 렌더링은 하지만 이에 대한 DOM 노드를 생성하는 대신 기존 HTML DOM 노드에 이벤트를 붙이는 형태로 작업됩니다. 이 작업을 hydration이라고 부릅니다. 건조한 HTML(SSR로 생성된 HTML)에 물을 주는 것과 같다고 해서 그렇습니다.
 
@@ -260,16 +261,16 @@ Suspense기능으로 인해 unlock된 React 18에서 2가지 중요한 feature�
 - **Streaming HTML** on the server: switch `renderToString` to new `renderToPipeableStream`
 - **Selective hydration** on the client: switch to new `hydrateRoot`. and wrapping parts of your app with `<Suspense>`
 
-> server-side rendering 직접 만들어서 테스트해보려다가 배보다 배꼽이 더 커진 케이스랄까... 처음 React SSR 서버를 직접 작성(이라곤 하지만 구글에서 대부분 가져옴)해보았는데 상당히 버거운 느낌이었습니다.  
-> 그러나 Suspense가 server-side에서도 잘 동작하도록 업데이트 되었으며, loadable-component와 같은 별도의 tool없이 Suspense SSR이 적용이 가능합니다.
+> 여담: server-side rendering 직접 만들어서 테스트해보려다가 배보다 배꼽이 더 커진 케이스랄까... 처음 React SSR 서버를 직접 작성(이라곤 하지만 구글에서 대부분 가져옴)해보았는데 상당히 버거운 느낌이었습니다.  
+> 그래도 동작?은 되었고 Suspense가 server-side에서도 잘 동작하도록 업데이트 되었있는걸 확인했습니다. loadable-component와 같은 별도의 tool없이 Suspense SSR이 적용이 가능한 것을 확인했습니다.
 
 **어떤 것을 표시하기 위해선 모든 것을 fetch 해야하는 것**
 
-|      ![streaming](./images/streaming.png)       |
-| :---------------------------------------------: |
-| **모든 데이터를 fetch하기 전에 HTML Streaming** |
+|  ![streaming](./images/streaming.png)  |
+| :------------------------------------: |
+| **모두 fetch하기 전에 HTML Streaming** |
 
-**Streaming HTML**가 이 문제를 해결합니다.
+**Streaming HTML**이 이 문제를 해결합니다.
 
 ```jsx
 <Layout>
@@ -288,11 +289,11 @@ Suspense를 통해 Comments가 완료되는지 안되는지 상관없이 HTML을
 클라이언트는 처음 HTML을 받고 난 후부터 Comments가 만들어지기 까지 Suspense가 fallback에 선언해둔 component를 보여주게 되고, Comments가 완료된 시점에 추가 HTML을 동일 스트림으로 보내고 해당 HTML을 올바른 위치에 넣을 수 있게 작은 인라인 `<script>` 태그를 보내주어 올바른 위치에 넣게 해줍니다.
 
 또한 기존 HTML Streaming 방식과 다르게 탑다운 순서로 진행될 필요도 없습니다.
-데이터가 특정 순서에 맞춰 로드되어야 한다는 요구사항은 없습니다.
+데이터가 특정 순서에 맞춰 로드되어야 한다는 요구사항도 없습니다.
 
 **어떤 것을 hydrate하기 위해선 모든 코드를 load 해야하는 것**
 
-위 해결로 인해 초기 HTML을 더 일찍 보낼 수 있지만 여전히 문제가 있습니다. JavaScript 코드가 모두 로그될 때까지 클라이언트에서 hydration을 시작할 수 없습니다.
+위 해결로 인해 초기 HTML을 더 일찍 보낼 수 있지만 여전히 문제가 있습니다. JavaScript 코드가 모두 로드될 때까지 클라이언트에서 hydration을 시작할 수 없습니다.
 
 큰 번들 사이즈를 피하기 위해 주로 "코드 스플리팅"이 사용됩니다. 특정 코드 부분이 동기적으로 로드될 필요가 없다라고 명시해주면 번들러가 이를 별도의 `<script>`태크로 분할합니다.
 
@@ -324,7 +325,7 @@ selective hydration 덕분에 JavaScript의 페이지의 무거운 부분이 나
 
 **어떤 것을 상호작용하기 위해선 모든 것에 hydrate 해야하는 것**
 
-streaming HTML과 selective hydrateion으로 인해 hydrate 때문에 브라우저가 다른 작업을 수행하는 것을 더이 상 차단하지 않습니다.
+streaming HTML과 selective hydrateion으로 인해 hydrate 때문에 브라우저가 다른 작업을 수행하는 것을 더이상 차단하지 않습니다.
 
 | ![interactive-hydrate](./images/interactive-hydrate.png) |
 | :------------------------------------------------------: |
@@ -395,4 +396,4 @@ React 18은 SSR에 2가지 주요 기능을 제공합니다.
 `<Suspense>` 컴포넌트는 이 모든 기능을 가지고 있습니다.
 React 내부에서 자동으로 이루어지며 대부분의 기존 React 코드와 함께 작동할 것으로 기대합니다. 이것은 loading state를 선언적으로 표현하는 힘을 보여줍니다.
 
-`if (isloading)`에서 `<Suspense>`로 바꾸는 것이 큰 변화처럼 보이진 않지만, 이러한 모든 개선사항을 잠금해제하는 큰 변화입니다.
+`if (isloading)`에서 `<Suspense>`로 바꾸는 것이 큰 차이로 보이진 않지만, 이러한 모든 개선사항을 잠금해제하는 중요한 변화입니다.
