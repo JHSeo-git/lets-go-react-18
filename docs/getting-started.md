@@ -22,6 +22,7 @@ React 18 변화를 한 단어로 정리하자면 Concurrency 입니다.
 
 - [automatic batching](#automatic-batching)
 - [transitions](#transitions)
+- [suspense](#suspense)
 
 ## automatic batching
 
