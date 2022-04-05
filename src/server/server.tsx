@@ -69,6 +69,7 @@ app.get('*', (req, res) => {
       // Full completion.
       // You can use this for SSG or crawlers.
       // res.statusCode = 200;
+      // res.setHeader('Content-type', 'text/html');
       // pipe(res);
     },
     onShellReady() {
